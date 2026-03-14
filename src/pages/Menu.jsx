@@ -11,12 +11,28 @@ export default function Menu() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    async function fetchMenu() {
-      if (!supabase) return
-      const { data, error } = await supabase.from('menu_items').select('*')
+    if (!supabase) return
+
+    // Initial fetch
+    supabase.from('menu_items').select('*').order('id').then(({ data, error }) => {
       if (!error && data?.length) setMenu(data)
-    }
-    fetchMenu()
+    })
+
+    // Realtime — reflect any menu changes live
+    const channel = supabase
+      .channel('menu-items')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'menu_items' }, (payload) => {
+        setMenu((prev) => [...prev, payload.new])
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'menu_items' }, (payload) => {
+        setMenu((prev) => prev.map((item) => (item.id === payload.new.id ? payload.new : item)))
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'menu_items' }, (payload) => {
+        setMenu((prev) => prev.filter((item) => item.id !== payload.old.id))
+      })
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
   }, [])
 
   const filtered = menu.filter((item) => {
