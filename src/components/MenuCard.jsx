@@ -5,6 +5,7 @@ import DrinkCustomizer from './DrinkCustomizer'
 
 export default function MenuCard({ item, index }) {
   const [showCustomizer, setShowCustomizer] = useState(false)
+  const unavailable = item.available === false
 
   return (
     <>
@@ -12,16 +13,21 @@ export default function MenuCard({ item, index }) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05, duration: 0.4 }}
-        whileHover={{ y: -4 }}
-        className="group bg-steam rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+        whileHover={unavailable ? {} : { y: -4 }}
+        className={`group bg-steam rounded-2xl p-5 shadow-sm transition-shadow relative overflow-hidden ${unavailable ? 'opacity-50' : 'hover:shadow-md'}`}
       >
-        {item.popular && (
+        {item.popular && !unavailable && (
           <span className="absolute top-3 right-3 bg-caramel/20 text-mocha text-xs font-semibold px-2.5 py-1 rounded-full">
             Populär
           </span>
         )}
+        {unavailable && (
+          <span className="absolute top-3 right-3 bg-espresso/10 text-mocha text-xs font-semibold px-2.5 py-1 rounded-full">
+            Slutsåld
+          </span>
+        )}
 
-        <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
+        <div className={`text-5xl mb-4 ${!unavailable ? 'group-hover:scale-110' : ''} transition-transform duration-300`}>
           {item.image}
         </div>
 
@@ -37,12 +43,13 @@ export default function MenuCard({ item, index }) {
             {item.price} kr
           </span>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowCustomizer(true)}
-            className="bg-espresso text-cream px-4 py-2 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-espresso-light transition-colors cursor-pointer"
+            whileHover={unavailable ? {} : { scale: 1.05 }}
+            whileTap={unavailable ? {} : { scale: 0.95 }}
+            onClick={() => !unavailable && setShowCustomizer(true)}
+            disabled={unavailable}
+            className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-1.5 transition-colors ${unavailable ? 'bg-cream-dark text-mocha-light cursor-not-allowed' : 'bg-espresso text-cream hover:bg-espresso-light cursor-pointer'}`}
           >
-            <FiPlus /> Lägg till
+            <FiPlus /> {unavailable ? 'Ej tillgänglig' : 'Lägg till'}
           </motion.button>
         </div>
       </motion.div>
