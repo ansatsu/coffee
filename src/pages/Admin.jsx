@@ -24,6 +24,8 @@ export default function Admin() {
   // Modal state
   const [formItem, setFormItem] = useState(undefined) // undefined = closed, null = new, item = edit
   const [deleteItem, setDeleteItem] = useState(null)
+  const [showReset, setShowReset] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     supabase
@@ -91,6 +93,27 @@ export default function Admin() {
   // Called when DeleteConfirm deletes successfully
   const handleDeleted = (id) => {
     setItems((prev) => prev.filter((i) => i.id !== id))
+  }
+
+  const handleFactoryReset = async () => {
+    setResetting(true)
+    const { error } = await supabase.rpc('factory_reset')
+    setResetting(false)
+    setShowReset(false)
+
+    if (error) {
+      toast.error('Återställningen misslyckades.')
+      return
+    }
+
+    // Re-fetch the fresh default items
+    const { data } = await supabase.from('menu_items').select('*').order('id')
+    if (data) setItems(data)
+
+    toast.success('Allt återställt till fabriksinställningar! 🏭', {
+      style: { background: '#2c1810', color: '#f5f0e8', borderRadius: '12px' },
+      duration: 4000,
+    })
   }
 
   // Group and sort by category
@@ -245,6 +268,26 @@ export default function Admin() {
             </button>
           </motion.div>
         )}
+
+        {/* Factory reset */}
+        {!loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-16 pt-8 border-t border-steam/60 flex flex-col items-center gap-3 text-center"
+          >
+            <p className="text-xs text-mocha-light/60 uppercase tracking-widest font-semibold">Farlig zon</p>
+            <p className="text-sm text-mocha-light max-w-sm">
+              Återställer menyn till de 12 ursprungliga produkterna och raderar alla beställningar permanent.
+            </p>
+            <button
+              onClick={() => setShowReset(true)}
+              className="mt-1 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-danger/10 text-danger border border-danger/20 hover:bg-danger hover:text-white font-semibold text-sm transition-colors"
+            >
+              🏭 Fabriksåterställning
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Create / Edit form modal */}
@@ -268,6 +311,65 @@ export default function Admin() {
             onClose={() => setDeleteItem(null)}
             onDeleted={handleDeleted}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Factory reset confirmation modal */}
+      <AnimatePresence>
+        {showReset && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={(e) => e.target === e.currentTarget && !resetting && setShowReset(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 16 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+              className="w-full max-w-sm bg-cream rounded-2xl shadow-2xl p-6 flex flex-col gap-4"
+            >
+              <div className="flex flex-col items-center gap-2 text-center">
+                <span className="text-4xl">🏭</span>
+                <h2 className="font-display text-xl font-bold text-espresso">Fabriksåterställning?</h2>
+                <p className="text-mocha-light text-sm">
+                  Det här raderar <span className="font-semibold text-danger">alla beställningar</span> och{' '}
+                  <span className="font-semibold text-danger">ersätter hela menyn</span> med de 12 ursprungliga
+                  produkterna. Det går inte att ångra.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowReset(false)}
+                  disabled={resetting}
+                  className="flex-1 h-11 rounded-xl border border-mocha/20 text-mocha font-medium hover:bg-steam transition-colors disabled:opacity-50"
+                >
+                  Avbryt
+                </button>
+                <button
+                  onClick={handleFactoryReset}
+                  disabled={resetting}
+                  className="flex-1 h-11 rounded-xl bg-danger text-white font-semibold hover:bg-danger/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {resetting ? (
+                    <>
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
+                        className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Återställer...
+                    </>
+                  ) : (
+                    'Ja, återställ allt'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>
