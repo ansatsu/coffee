@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FiArrowRight, FiStar, FiPlus } from 'react-icons/fi'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SteamAnimation from '../components/SteamAnimation'
 import DrinkCustomizer from '../components/DrinkCustomizer'
 import { defaultMenu } from '../lib/menu'
+import { supabase } from '../lib/supabase'
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -23,8 +24,72 @@ const floatingItems = [
 ]
 
 export default function Home() {
-  const popular = defaultMenu.filter((item) => item.popular).slice(0, 4)
+  const fallbackPopular = defaultMenu.filter((i) => i.popular).slice(0, 4)
+  const [popular, setPopular] = useState(fallbackPopular)
   const [customizing, setCustomizing] = useState(null)
+
+  useEffect(() => {
+    async function fetchPopular() {
+      const { data, error } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('popular', true)
+        .eq('available', true)
+        .order('id')
+        .limit(4)
+
+      if (!error && data && data.length > 0) {
+        setPopular(data)
+      } else {
+        setPopular(fallbackPopular)
+      }
+    }
+
+    fetchPopular()
+
+    const channel = supabase
+      .channel('menu_items_popular')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'menu_items' },
+        (payload) => {
+          const item = payload.new
+          if (item.popular && item.available) {
+            setPopular((prev) => {
+              if (prev.find((i) => i.id === item.id)) return prev
+              return [...prev, item].slice(0, 4)
+            })
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'menu_items' },
+        (payload) => {
+          const item = payload.new
+          setPopular((prev) => {
+            const filtered = prev.filter((i) => i.id !== item.id)
+            if (item.popular && item.available) {
+              return [...filtered, item].slice(0, 4)
+            }
+            return filtered
+          })
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'menu_items' },
+        (payload) => {
+          const deletedId = payload.old.id
+          setPopular((prev) => prev.filter((i) => i.id !== deletedId))
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen">
