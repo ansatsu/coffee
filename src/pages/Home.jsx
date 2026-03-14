@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiStar } from 'react-icons/fi'
+import { FiArrowRight, FiStar, FiPlus } from 'react-icons/fi'
+import { useState } from 'react'
 import SteamAnimation from '../components/SteamAnimation'
+import DrinkCustomizer from '../components/DrinkCustomizer'
 import { defaultMenu } from '../lib/menu'
 
 const fadeUp = {
@@ -22,6 +24,7 @@ const floatingItems = [
 
 export default function Home() {
   const popular = defaultMenu.filter((item) => item.popular).slice(0, 4)
+  const [customizing, setCustomizing] = useState(null)
 
   return (
     <div className="min-h-screen">
@@ -162,12 +165,22 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -6, scale: 1.02 }}
-              className="bg-steam rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+              className="bg-steam rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow flex flex-col"
             >
               <div className="text-5xl mb-3">{item.image}</div>
               <h3 className="font-display font-semibold text-espresso mb-1">{item.name}</h3>
-              <p className="text-mocha-light text-sm mb-2">{item.description}</p>
-              <span className="text-mocha font-semibold">{item.price} kr</span>
+              <p className="text-mocha-light text-sm mb-3">{item.description}</p>
+              <div className="mt-auto flex items-center justify-between">
+                <span className="text-mocha font-semibold">{item.price} kr</span>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setCustomizing(item)}
+                  className="bg-espresso text-cream p-2 rounded-full hover:bg-espresso-light transition-colors cursor-pointer"
+                >
+                  <FiPlus size={16} />
+                </motion.button>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -189,6 +202,8 @@ export default function Home() {
           </Link>
         </motion.div>
       </section>
+
+      {customizing && <DrinkCustomizer item={customizing} onClose={() => setCustomizing(null)} />}
 
       {/* Cozy banner */}
       <section className="bg-espresso text-cream py-16">
