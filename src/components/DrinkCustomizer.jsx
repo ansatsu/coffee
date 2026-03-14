@@ -82,7 +82,7 @@ export default function DrinkCustomizer({ item, onClose }) {
                 >
                   {s.label}
                   {s.extra > 0 && (
-                    <span className="block text-xs opacity-70">+{s.extra.toFixed(2)} kr</span>
+                    <span className="block text-xs opacity-70">+{s.extra} kr</span>
                   )}
                 </button>
               ))}
@@ -105,7 +105,7 @@ export default function DrinkCustomizer({ item, onClose }) {
                 >
                   {m.label}
                   {m.extra > 0 && (
-                    <span className="block text-xs opacity-70">+{m.extra.toFixed(2)} kr</span>
+                    <span className="block text-xs opacity-70">+{m.extra} kr</span>
                   )}
                 </button>
               ))}
@@ -139,7 +139,7 @@ export default function DrinkCustomizer({ item, onClose }) {
             onClick={handleAdd}
             className="w-full bg-espresso text-cream py-3.5 rounded-xl font-semibold text-base hover:bg-espresso-light transition-colors cursor-pointer"
           >
-            Lägg till {quantity} — {(totalPrice * quantity).toFixed(2)} kr
+            Lägg till {quantity} — {totalPrice * quantity} kr
           </motion.button>
         </motion.div>
       </motion.div>

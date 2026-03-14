@@ -34,7 +34,7 @@ export default function MenuCard({ item, index }) {
 
         <div className="flex items-center justify-between">
           <span className="text-xl font-semibold text-espresso">
-            {item.price.toFixed(2)} kr
+            {item.price} kr
           </span>
           <motion.button
             whileHover={{ scale: 1.05 }}
