@@ -49,7 +49,7 @@ export default function Admin() {
         setItems((prev) => prev.map((i) => (i.id === payload.new.id ? payload.new : i)))
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'menu_items' }, (payload) => {
-        setItems((prev) => prev.filter((i) => i.id !== payload.old.id))
+        setItems((prev) => prev.filter((i) => i.id !== Number(payload.old.id)))
       })
       .subscribe()
 

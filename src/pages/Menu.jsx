@@ -28,7 +28,7 @@ export default function Menu() {
         setMenu((prev) => prev.map((item) => (item.id === payload.new.id ? payload.new : item)))
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'menu_items' }, (payload) => {
-        setMenu((prev) => prev.filter((item) => item.id !== payload.old.id))
+        setMenu((prev) => prev.filter((item) => item.id !== Number(payload.old.id)))
       })
       .subscribe()
 
