@@ -23,6 +23,8 @@ No test suite exists in this project.
 
 **State:** Cart state lives entirely in `CartContext` (useReducer). No other global state. Supabase is the source of truth for orders and menu items.
 
+**Supabase changes** (schema migrations, seeding, SQL) are made via the Supabase MCP connection — use the `mcp__supabase__apply_migration` tool for DDL and `mcp__supabase__execute_sql` for data. Project ID: `odpmhpqyyshgftrkyjcx`.
+
 **Two Supabase tables:**
 - `menu_items` — seeded with 12 Swedish drinks. Menu page fetches on mount and subscribes to realtime INSERT/UPDATE/DELETE.
 - `orders` — has `id` (uuid), `order_number` (auto-incrementing from 100), `items` (JSONB array with `{name, size, milk, quantity, price, image}`), `total`, `status` (`pending → preparing → ready → completed`). Order Monitor subscribes to realtime changes.
