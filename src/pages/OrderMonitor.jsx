@@ -8,9 +8,6 @@ const STATUS_CONFIG = {
   ready: { label: 'Klar! 🎉', bg: 'bg-green-100', border: 'border-green-400', text: 'text-green-800', dot: 'bg-green-500' },
 }
 
-const NEXT_STATUS = { pending: 'preparing', preparing: 'ready', ready: 'completed' }
-const NEXT_LABEL = { pending: 'Påbörja', preparing: 'Klar!', ready: 'Hämtad' }
-
 export default function OrderMonitor() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -53,7 +50,8 @@ export default function OrderMonitor() {
   }, [])
 
   const advanceStatus = async (order) => {
-    const next = NEXT_STATUS[order.status]
+    const map = { pending: 'preparing', preparing: 'ready', ready: 'completed' }
+    const next = map[order.status]
     if (!next) return
 
     // Optimistic update
@@ -159,16 +157,38 @@ export default function OrderMonitor() {
                   <span className={`text-sm font-semibold ${cfg.text}`}>{cfg.label}</span>
                 </div>
 
-                {/* Advance button — staff control */}
-                {NEXT_STATUS[order.status] && (
+                {/* Step 1: start prepping */}
+                {order.status === 'pending' && (
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => advanceStatus(order)}
                     className="w-full py-2.5 rounded-xl bg-espresso text-cream font-semibold text-sm hover:bg-espresso-light transition-colors cursor-pointer"
                   >
-                    {NEXT_LABEL[order.status]}
+                    Påbörja
                   </motion.button>
+                )}
+
+                {/* Step 2: mark done */}
+                {order.status === 'preparing' && (
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => advanceStatus(order)}
+                    className="w-full py-2.5 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-colors cursor-pointer"
+                  >
+                    Klar!
+                  </motion.button>
+                )}
+
+                {/* Ready — stays visible for customer, small dismiss for staff */}
+                {order.status === 'ready' && (
+                  <button
+                    onClick={() => advanceStatus(order)}
+                    className="w-full py-1.5 rounded-xl border border-green-400 text-green-700 text-xs font-medium hover:bg-green-200 transition-colors cursor-pointer"
+                  >
+                    Hämtad — ta bort
+                  </button>
                 )}
               </motion.div>
             )
