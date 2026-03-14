@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiShoppingBag, FiCoffee, FiMenu, FiX } from 'react-icons/fi'
+import { FiShoppingBag, FiCoffee, FiMenu, FiX, FiSettings } from 'react-icons/fi'
 import { MdQrCode2 } from 'react-icons/md'
 import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
@@ -18,6 +18,7 @@ export default function Navbar() {
     { to: '/', label: 'Hem' },
     { to: '/menu', label: 'Meny' },
     { to: '/orders', label: 'Beställningar' },
+    { to: '/admin', label: 'Admin' },
     { to: '/cart', label: 'Varukorg' },
   ]
 
@@ -56,6 +57,18 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
+
+            {/* Admin button */}
+            <Link to="/admin">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className={`p-2.5 rounded-full transition-colors ${location.pathname === '/admin' ? 'bg-espresso text-cream' : 'bg-cream-dark text-mocha hover:bg-latte-light'}`}
+                title="Admin"
+              >
+                <FiSettings className="text-lg" />
+              </motion.div>
+            </Link>
 
             {/* QR button */}
             <motion.button

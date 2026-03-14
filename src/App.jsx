@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import Menu from './pages/Menu'
 import Cart from './pages/Cart'
 import OrderMonitor from './pages/OrderMonitor'
+import Admin from './pages/Admin'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
               <Route path="/menu" element={<Menu />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<OrderMonitor />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
           </main>
           <Footer />
