@@ -14,8 +14,18 @@ export default function MenuCard({ item, index }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05, duration: 0.4 }}
         whileHover={unavailable ? {} : { y: -4 }}
-        className={`group bg-steam rounded-2xl p-5 shadow-sm transition-shadow relative overflow-hidden ${unavailable ? 'opacity-50' : 'hover:shadow-md'}`}
+        className={`group bg-steam rounded-2xl p-5 shadow-sm transition-shadow relative overflow-hidden ${unavailable ? 'opacity-60' : 'hover:shadow-md'}`}
       >
+        {/* Diagonal stripe overlay when sold out */}
+        {unavailable && (
+          <div
+            className="absolute inset-0 rounded-2xl pointer-events-none z-10"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(111,78,55,0.08) 8px, rgba(111,78,55,0.08) 14px)',
+            }}
+          />
+        )}
+
         {item.popular && !unavailable && (
           <span className="absolute top-3 right-3 bg-caramel/20 text-mocha text-xs font-semibold px-2.5 py-1 rounded-full">
             Populär
