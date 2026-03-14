@@ -1,10 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY || ''
+export const supabase = createClient(
+  'https://odpmhpqyyshgftrkyjcx.supabase.co',
+  'sb_publishable_zrX_YvisW3Ll1j_d2cJKSw_dlBSUr1A'
+)
 
-export const supabase = supabaseUrl && supabaseKey
-  ? createClient(supabaseUrl, supabaseKey)
-  : null
-
-export const isConfigured = () => !!supabase
+export const isConfigured = () => true
