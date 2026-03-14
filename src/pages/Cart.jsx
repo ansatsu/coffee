@@ -10,41 +10,91 @@ import { useState } from 'react'
 export default function Cart() {
   const { items, removeItem, updateQuantity, clearCart, totalPrice } = useCart()
   const [placing, setPlacing] = useState(false)
+  const [confirmedOrder, setConfirmedOrder] = useState(null)
 
   const handlePlaceOrder = async () => {
     if (!items.length) return
     setPlacing(true)
 
     if (supabase) {
-      const { error } = await supabase.from('orders').insert({
-        items: items.map((i) => ({
-          name: i.name,
-          size: i.size,
-          milk: i.milk,
-          quantity: i.quantity,
-          price: i.totalPrice,
-        })),
-        total: totalPrice,
-        status: 'pending',
-      })
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          items: items.map((i) => ({
+            name: i.name,
+            size: i.size,
+            milk: i.milk,
+            quantity: i.quantity,
+            price: i.totalPrice,
+            image: i.image,
+          })),
+          total: totalPrice,
+          status: 'pending',
+        })
+        .select('order_number')
+        .single()
 
       if (error) {
         toast.error('Det gick inte att lägga beställningen. Försök igen.')
         setPlacing(false)
         return
       }
+
+      clearCart()
+      setPlacing(false)
+      setConfirmedOrder(data.order_number)
+      return
     }
 
     clearCart()
     setPlacing(false)
-    toast.success('Beställning lagd! Ditt kaffe förbereds ☕', {
-      duration: 4000,
-      style: {
-        background: '#2c1810',
-        color: '#f5f0e8',
-        borderRadius: '12px',
-      },
-    })
+    setConfirmedOrder('?')
+  }
+
+  if (confirmedOrder) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', damping: 15 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <div className="text-6xl">☕</div>
+          <h2 className="font-display text-2xl font-semibold text-espresso">
+            Beställning mottagen!
+          </h2>
+          <p className="text-mocha-light">Ditt ordernummer är</p>
+          <div className="bg-espresso text-cream rounded-3xl px-12 py-8">
+            <div className="text-xs tracking-widest uppercase text-cream/60 mb-2">Beställning</div>
+            <div className="font-display text-8xl font-bold leading-none">#{confirmedOrder}</div>
+          </div>
+          <p className="text-mocha-light text-sm max-w-xs">
+            Håll koll på beställningsöversikten — vi pingar dig när ditt kaffe är klart!
+          </p>
+          <div className="flex gap-3 flex-wrap justify-center">
+            <Link to="/orders">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-espresso text-cream px-6 py-3 rounded-full font-semibold flex items-center gap-2 hover:bg-espresso-light transition-colors cursor-pointer"
+              >
+                Se beställningsöversikt <FiArrowRight />
+              </motion.button>
+            </Link>
+            <Link to="/menu">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-cream-dark text-mocha px-6 py-3 rounded-full font-semibold hover:bg-latte-light transition-colors cursor-pointer"
+              >
+                Beställ mer
+              </motion.button>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    )
   }
 
   if (items.length === 0) {
