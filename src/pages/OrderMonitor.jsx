@@ -14,7 +14,6 @@ const NEXT_LABEL = { pending: 'Påbörja', preparing: 'Klar!', ready: 'Hämtad' 
 export default function OrderMonitor() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [updating, setUpdating] = useState(null)
 
   useEffect(() => {
     if (!supabase) return
@@ -56,9 +55,24 @@ export default function OrderMonitor() {
   const advanceStatus = async (order) => {
     const next = NEXT_STATUS[order.status]
     if (!next) return
-    setUpdating(order.id)
-    await supabase.from('orders').update({ status: next }).eq('id', order.id)
-    setUpdating(null)
+
+    // Optimistic update
+    if (next === 'completed') {
+      setOrders((prev) => prev.filter((x) => x.id !== order.id))
+    } else {
+      setOrders((prev) => prev.map((x) => (x.id === order.id ? { ...x, status: next } : x)))
+    }
+
+    const { error } = await supabase.from('orders').update({ status: next }).eq('id', order.id)
+
+    // Revert on failure
+    if (error) {
+      setOrders((prev) => {
+        const exists = prev.find((x) => x.id === order.id)
+        if (exists) return prev.map((x) => (x.id === order.id ? { ...x, status: order.status } : x))
+        return [...prev, order].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      })
+    }
   }
 
   if (!supabase) {
@@ -151,10 +165,9 @@ export default function OrderMonitor() {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => advanceStatus(order)}
-                    disabled={updating === order.id}
-                    className="w-full py-2.5 rounded-xl bg-espresso text-cream font-semibold text-sm hover:bg-espresso-light transition-colors disabled:opacity-50 cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-espresso text-cream font-semibold text-sm hover:bg-espresso-light transition-colors cursor-pointer"
                   >
-                    {updating === order.id ? '...' : NEXT_LABEL[order.status]}
+                    {NEXT_LABEL[order.status]}
                   </motion.button>
                 )}
               </motion.div>
