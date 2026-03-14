@@ -34,8 +34,8 @@ export default function Menu() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <h1 className="font-display text-4xl font-bold text-espresso mb-2">Our Menu</h1>
-        <p className="text-mocha-light">Crafted with care, served with warmth</p>
+        <h1 className="font-display text-4xl font-bold text-espresso mb-2">Vår Meny</h1>
+        <p className="text-mocha-light">Skapad med omsorg, serverad med värme</p>
       </motion.div>
 
       {/* Search */}
@@ -49,7 +49,7 @@ export default function Menu() {
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-mocha-light" />
           <input
             type="text"
-            placeholder="Search drinks..."
+            placeholder="Sök drycker..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-steam border border-cream-dark focus:border-caramel focus:outline-none transition-colors text-espresso"
@@ -95,7 +95,7 @@ export default function Menu() {
           className="text-center py-16 text-mocha-light"
         >
           <div className="text-5xl mb-4">🔍</div>
-          <p className="text-lg">No drinks found. Try a different search!</p>
+          <p className="text-lg">Inga drycker hittades. Prova en annan sökning!</p>
         </motion.div>
       )}
     </div>

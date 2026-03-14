@@ -17,7 +17,7 @@ export default function MenuCard({ item, index }) {
       >
         {item.popular && (
           <span className="absolute top-3 right-3 bg-caramel/20 text-mocha text-xs font-semibold px-2.5 py-1 rounded-full">
-            Popular
+            Populär
           </span>
         )}
 
@@ -42,7 +42,7 @@ export default function MenuCard({ item, index }) {
             onClick={() => setShowCustomizer(true)}
             className="bg-espresso text-cream px-4 py-2 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-espresso-light transition-colors cursor-pointer"
           >
-            <FiPlus /> Add
+            <FiPlus /> Lägg till
           </motion.button>
         </div>
       </motion.div>

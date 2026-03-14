@@ -10,9 +10,9 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const links = [
-    { to: '/', label: 'Home' },
-    { to: '/menu', label: 'Menu' },
-    { to: '/cart', label: 'Cart' },
+    { to: '/', label: 'Hem' },
+    { to: '/menu', label: 'Meny' },
+    { to: '/cart', label: 'Varukorg' },
   ]
 
   return (
@@ -28,7 +28,7 @@ export default function Navbar() {
             <FiCoffee className="text-mocha text-2xl" />
           </motion.div>
           <span className="font-display text-xl font-semibold text-espresso">
-            The Cozy Bean
+            Leo och Liams Mysiga Kaffeböna
           </span>
         </Link>
 

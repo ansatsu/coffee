@@ -30,17 +30,17 @@ export default function Home() {
           transition={{ delay: 0.1, duration: 0.6 }}
           className="font-display text-4xl sm:text-6xl font-bold text-espresso leading-tight mb-4"
         >
-          Warmth in
+          Värme i
           <br />
-          <span className="text-mocha italic">every sip</span>
+          <span className="text-mocha italic">varje klunk</span>
         </motion.h1>
         <motion.p
           {...fadeUp}
           transition={{ delay: 0.2, duration: 0.6 }}
           className="text-mocha-light text-lg sm:text-xl max-w-md mx-auto mb-8 leading-relaxed"
         >
-          Handcrafted drinks made with love, served with a smile.
-          Order ahead and skip the line.
+          Hantverksdrycker gjorda med kärlek, serverade med ett leende.
+          Förbeställ och hoppa över kön.
         </motion.p>
         <motion.div
           {...fadeUp}
@@ -53,7 +53,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
               className="bg-espresso text-cream px-8 py-3.5 rounded-full text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0 hover:bg-espresso-light transition-colors cursor-pointer"
             >
-              Browse Menu <FiArrowRight />
+              Bläddra i menyn <FiArrowRight />
             </motion.button>
           </Link>
         </motion.div>
@@ -68,10 +68,10 @@ export default function Home() {
           className="text-center mb-10"
         >
           <div className="flex items-center justify-center gap-2 text-caramel mb-2">
-            <FiStar /> <span className="text-sm font-semibold uppercase tracking-wider">Customer Favorites</span> <FiStar />
+            <FiStar /> <span className="text-sm font-semibold uppercase tracking-wider">Kundfavoriter</span> <FiStar />
           </div>
           <h2 className="font-display text-3xl font-semibold text-espresso">
-            Most loved drinks
+            Mest älskade drycker
           </h2>
         </motion.div>
 
@@ -106,7 +106,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
               className="bg-cream-dark text-espresso px-6 py-3 rounded-full font-medium flex items-center gap-2 mx-auto hover:bg-latte-light transition-colors cursor-pointer"
             >
-              View Full Menu <FiArrowRight />
+              Se hela menyn <FiArrowRight />
             </motion.button>
           </Link>
         </motion.div>
@@ -121,11 +121,11 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="font-display text-3xl font-semibold mb-4 text-cream">
-              Open daily, 7am — 8pm
+              Öppet dagligen, 07:00 — 20:00
             </h2>
             <p className="text-cream/60 max-w-lg mx-auto">
-              Whether you&apos;re grabbing your morning pick-me-up or settling in for an
-              afternoon study session, we&apos;ve got a cozy spot and a warm cup waiting for you.
+              Oavsett om du hämtar din morgonboost eller slår dig ner för en
+              eftermiddags studiesession, har vi en mysig plats och en varm kopp som väntar på dig.
             </p>
           </motion.div>
         </div>

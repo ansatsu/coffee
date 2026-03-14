@@ -29,7 +29,7 @@ export default function Cart() {
       })
 
       if (error) {
-        toast.error('Failed to place order. Please try again.')
+        toast.error('Det gick inte att lägga beställningen. Försök igen.')
         setPlacing(false)
         return
       }
@@ -37,7 +37,7 @@ export default function Cart() {
 
     clearCart()
     setPlacing(false)
-    toast.success('Order placed! Your coffee is being prepared ☕', {
+    toast.success('Beställning lagd! Ditt kaffe förbereds ☕', {
       duration: 4000,
       style: {
         background: '#2c1810',
@@ -57,10 +57,10 @@ export default function Cart() {
         >
           <div className="text-7xl mb-6">🛒</div>
           <h2 className="font-display text-2xl font-semibold text-espresso mb-3">
-            Your cart is empty
+            Din varukorg är tom
           </h2>
           <p className="text-mocha-light mb-8">
-            Looks like you haven&apos;t added any drinks yet
+            Det verkar som att du inte har lagt till några drycker än
           </p>
           <Link to="/menu">
             <motion.button
@@ -68,7 +68,7 @@ export default function Cart() {
               whileTap={{ scale: 0.95 }}
               className="bg-espresso text-cream px-6 py-3 rounded-full font-semibold flex items-center gap-2 mx-auto hover:bg-espresso-light transition-colors cursor-pointer"
             >
-              Browse Menu <FiArrowRight />
+              Bläddra i menyn <FiArrowRight />
             </motion.button>
           </Link>
         </motion.div>
@@ -84,13 +84,13 @@ export default function Cart() {
       >
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-display text-3xl font-bold text-espresso flex items-center gap-3">
-            <FiShoppingBag className="text-mocha" /> Your Cart
+            <FiShoppingBag className="text-mocha" /> Din Varukorg
           </h1>
           <button
             onClick={clearCart}
             className="text-danger text-sm font-medium hover:underline cursor-pointer"
           >
-            Clear all
+            Rensa allt
           </button>
         </div>
 
@@ -112,7 +112,7 @@ export default function Cart() {
                   {milkOptions.find((m) => m.id === item.milk)?.label}
                 </p>
                 <span className="text-mocha font-medium text-sm">
-                  ${item.totalPrice.toFixed(2)} each
+                  ${item.totalPrice.toFixed(2)} styck
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -147,15 +147,15 @@ export default function Cart() {
         {/* Totals */}
         <motion.div layout className="bg-espresso rounded-xl p-5 mt-6 text-cream">
           <div className="flex justify-between mb-2 text-cream/70">
-            <span>Subtotal</span>
+            <span>Delsumma</span>
             <span>${totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between mb-4 text-cream/70">
-            <span>Tax</span>
+            <span>Moms</span>
             <span>${(totalPrice * 0.08).toFixed(2)}</span>
           </div>
           <div className="border-t border-cream/20 pt-3 flex justify-between text-lg font-semibold">
-            <span>Total</span>
+            <span>Totalt</span>
             <span>${(totalPrice * 1.08).toFixed(2)}</span>
           </div>
           <motion.button
@@ -165,7 +165,7 @@ export default function Cart() {
             disabled={placing}
             className="w-full mt-4 bg-caramel text-espresso py-3.5 rounded-xl font-semibold text-base hover:bg-latte transition-colors cursor-pointer disabled:opacity-50"
           >
-            {placing ? 'Placing Order...' : 'Place Order'}
+            {placing ? 'Beställer...' : 'Lägg beställning'}
           </motion.button>
         </motion.div>
       </motion.div>

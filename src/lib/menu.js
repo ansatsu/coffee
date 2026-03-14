@@ -1,8 +1,8 @@
 export const defaultMenu = [
   {
     id: 1,
-    name: 'Classic Espresso',
-    description: 'Rich, bold single-origin espresso with a velvety crema',
+    name: 'Klassisk Espresso',
+    description: 'Rik, kraftfull single-origin espresso med en sammetslen crema',
     price: 3.50,
     category: 'espresso',
     image: '☕',
@@ -10,8 +10,8 @@ export const defaultMenu = [
   },
   {
     id: 2,
-    name: 'Vanilla Latte',
-    description: 'Smooth espresso with steamed milk and house-made vanilla syrup',
+    name: 'Vanilj Latte',
+    description: 'Len espresso med ångad mjölk och hemgjord vaniljsirap',
     price: 5.25,
     category: 'latte',
     image: '🥛',
@@ -19,8 +19,8 @@ export const defaultMenu = [
   },
   {
     id: 3,
-    name: 'Caramel Macchiato',
-    description: 'Espresso marked with foamed milk and drizzled with buttery caramel',
+    name: 'Karamell Macchiato',
+    description: 'Espresso med mjölkskum och ett drizzle av smörig karamell',
     price: 5.75,
     category: 'latte',
     image: '🍮',
@@ -29,7 +29,7 @@ export const defaultMenu = [
   {
     id: 4,
     name: 'Mocha Delight',
-    description: 'Belgian chocolate meets espresso, topped with whipped cream',
+    description: 'Belgisk choklad möter espresso, toppad med vispgrädde',
     price: 5.50,
     category: 'mocha',
     image: '🍫',
@@ -38,7 +38,7 @@ export const defaultMenu = [
   {
     id: 5,
     name: 'Cold Brew',
-    description: '18-hour slow-steeped for a smooth, naturally sweet finish',
+    description: '18 timmars långsam brantning för en len, naturligt söt avslutning',
     price: 4.75,
     category: 'cold',
     image: '🧊',
@@ -46,8 +46,8 @@ export const defaultMenu = [
   },
   {
     id: 6,
-    name: 'Chai Tea Latte',
-    description: 'Spiced chai blend with steamed oat milk and a hint of honey',
+    name: 'Chai Te Latte',
+    description: 'Kryddig chai med ångad havremjölk och en hint av honung',
     price: 5.00,
     category: 'tea',
     image: '🍵',
@@ -56,7 +56,7 @@ export const defaultMenu = [
   {
     id: 7,
     name: 'Matcha Latte',
-    description: 'Ceremonial-grade matcha whisked with your choice of milk',
+    description: 'Ceremoniell matcha vispat med valfri mjölk',
     price: 5.50,
     category: 'tea',
     image: '🍃',
@@ -65,7 +65,7 @@ export const defaultMenu = [
   {
     id: 8,
     name: 'Americano',
-    description: 'Espresso diluted with hot water for a clean, bright cup',
+    description: 'Espresso utspädd med hett vatten för en ren, frisk kopp',
     price: 3.75,
     category: 'espresso',
     image: '☕',
@@ -74,7 +74,7 @@ export const defaultMenu = [
   {
     id: 9,
     name: 'Cappuccino',
-    description: 'Equal parts espresso, steamed milk, and cloud-like foam',
+    description: 'Lika delar espresso, ångad mjölk och molnliknande skum',
     price: 4.50,
     category: 'espresso',
     image: '☁️',
@@ -83,7 +83,7 @@ export const defaultMenu = [
   {
     id: 10,
     name: 'Affogato',
-    description: 'A scoop of vanilla gelato drowned in hot espresso',
+    description: 'En kula vaniljglass dränkt i het espresso',
     price: 6.00,
     category: 'specialty',
     image: '🍨',
@@ -91,8 +91,8 @@ export const defaultMenu = [
   },
   {
     id: 11,
-    name: 'Lavender Honey Latte',
-    description: 'Floral lavender and wildflower honey with silky steamed milk',
+    name: 'Lavendel Honung Latte',
+    description: 'Blommig lavendel och vildblommshonung med silkeslen ångad mjölk',
     price: 5.75,
     category: 'specialty',
     image: '💜',
@@ -100,8 +100,8 @@ export const defaultMenu = [
   },
   {
     id: 12,
-    name: 'Iced Coconut Mocha',
-    description: 'Chocolate espresso poured over coconut milk and ice',
+    name: 'Isad Kokosnöt Mocha',
+    description: 'Chokladespresso hälld över kokosmjölk och is',
     price: 5.50,
     category: 'cold',
     image: '🥥',
@@ -110,25 +110,25 @@ export const defaultMenu = [
 ]
 
 export const categories = [
-  { id: 'all', label: 'All Drinks' },
+  { id: 'all', label: 'Alla Drycker' },
   { id: 'espresso', label: 'Espresso' },
   { id: 'latte', label: 'Lattes' },
   { id: 'mocha', label: 'Mochas' },
-  { id: 'cold', label: 'Cold Drinks' },
-  { id: 'tea', label: 'Tea' },
-  { id: 'specialty', label: 'Specialty' },
+  { id: 'cold', label: 'Kalla Drycker' },
+  { id: 'tea', label: 'Te' },
+  { id: 'specialty', label: 'Specialitet' },
 ]
 
 export const sizes = [
-  { id: 'small', label: 'Small', extra: 0 },
+  { id: 'small', label: 'Liten', extra: 0 },
   { id: 'medium', label: 'Medium', extra: 0.75 },
-  { id: 'large', label: 'Large', extra: 1.50 },
+  { id: 'large', label: 'Stor', extra: 1.50 },
 ]
 
 export const milkOptions = [
-  { id: 'whole', label: 'Whole Milk', extra: 0 },
-  { id: 'oat', label: 'Oat Milk', extra: 0.60 },
-  { id: 'almond', label: 'Almond Milk', extra: 0.60 },
-  { id: 'coconut', label: 'Coconut Milk', extra: 0.60 },
-  { id: 'none', label: 'No Milk', extra: 0 },
+  { id: 'whole', label: 'Helmjölk', extra: 0 },
+  { id: 'oat', label: 'Havremjölk', extra: 0.60 },
+  { id: 'almond', label: 'Mandelmjölk', extra: 0.60 },
+  { id: 'coconut', label: 'Kokosmjölk', extra: 0.60 },
+  { id: 'none', label: 'Utan Mjölk', extra: 0 },
 ]

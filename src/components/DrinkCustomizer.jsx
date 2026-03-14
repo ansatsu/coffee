@@ -23,7 +23,7 @@ export default function DrinkCustomizer({ item, onClose }) {
       quantity,
       totalPrice,
     })
-    toast.success(`${item.name} added to cart!`, {
+    toast.success(`${item.name} har lagts i varukorgen!`, {
       icon: item.image,
       style: {
         background: '#2c1810',
@@ -68,7 +68,7 @@ export default function DrinkCustomizer({ item, onClose }) {
 
           {/* Size */}
           <div className="mb-4">
-            <label className="text-sm font-medium text-mocha mb-2 block">Size</label>
+            <label className="text-sm font-medium text-mocha mb-2 block">Storlek</label>
             <div className="flex gap-2">
               {sizes.map((s) => (
                 <button
@@ -91,7 +91,7 @@ export default function DrinkCustomizer({ item, onClose }) {
 
           {/* Milk */}
           <div className="mb-5">
-            <label className="text-sm font-medium text-mocha mb-2 block">Milk</label>
+            <label className="text-sm font-medium text-mocha mb-2 block">Mjölk</label>
             <div className="grid grid-cols-3 gap-2">
               {milkOptions.map((m) => (
                 <button
@@ -114,7 +114,7 @@ export default function DrinkCustomizer({ item, onClose }) {
 
           {/* Quantity */}
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-medium text-mocha">Quantity</span>
+            <span className="text-sm font-medium text-mocha">Antal</span>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -139,7 +139,7 @@ export default function DrinkCustomizer({ item, onClose }) {
             onClick={handleAdd}
             className="w-full bg-espresso text-cream py-3.5 rounded-xl font-semibold text-base hover:bg-espresso-light transition-colors cursor-pointer"
           >
-            Add {quantity} — ${(totalPrice * quantity).toFixed(2)}
+            Lägg till {quantity} — ${(totalPrice * quantity).toFixed(2)}
           </motion.button>
         </motion.div>
       </motion.div>

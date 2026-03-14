@@ -7,10 +7,10 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <FiCoffee className="text-caramel" />
-            <span className="font-display text-cream/80">The Cozy Bean</span>
+            <span className="font-display text-cream/80">Leo och Liams Mysiga Kaffeböna</span>
           </div>
           <p className="text-sm flex items-center gap-1">
-            Made with <FiHeart className="text-caramel" /> and lots of coffee
+            Gjord med <FiHeart className="text-caramel" /> och massor av kaffe
           </p>
         </div>
       </div>
