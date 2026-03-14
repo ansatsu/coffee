@@ -36,6 +36,24 @@ const ORBS = [
   { x: '50%', y: '10%', color: 'radial-gradient(circle, rgba(196,168,130,0.12) 0%, transparent 70%)', size: 400, duration: 15, dx: 30, dy: 70 },
 ]
 
+function playOrderChime() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)()
+  const notes = [880, 660]
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.type = 'sine'
+    osc.frequency.value = freq
+    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18)
+    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.18 + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.6)
+    osc.start(ctx.currentTime + i * 0.18)
+    osc.stop(ctx.currentTime + i * 0.18 + 0.6)
+  })
+}
+
 export default function OrderMonitor() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -59,6 +77,7 @@ export default function OrderMonitor() {
         if (payload.eventType === 'INSERT') {
           const o = payload.new
           if (['pending', 'preparing', 'ready'].includes(o.status)) {
+            playOrderChime()
             setOrders((prev) => [...prev, o].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)))
           }
         } else if (payload.eventType === 'UPDATE') {
