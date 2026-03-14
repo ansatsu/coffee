@@ -9,54 +9,132 @@ const fadeUp = {
   animate: { opacity: 1, y: 0 },
 }
 
+const floatingItems = [
+  { emoji: '☕', x: '8%',  y: '12%', size: '2rem',  duration: 6,   delay: 0 },
+  { emoji: '🫘', x: '88%', y: '8%',  size: '1.5rem', duration: 7,   delay: 1 },
+  { emoji: '🫘', x: '5%',  y: '60%', size: '1.2rem', duration: 8,   delay: 2 },
+  { emoji: '✨', x: '92%', y: '55%', size: '1.4rem', duration: 5,   delay: 0.5 },
+  { emoji: '🫘', x: '80%', y: '80%', size: '1.6rem', duration: 9,   delay: 1.5 },
+  { emoji: '✨', x: '15%', y: '85%', size: '1.1rem', duration: 6.5, delay: 3 },
+  { emoji: '🫘', x: '50%', y: '5%',  size: '1.3rem', duration: 7.5, delay: 2.5 },
+  { emoji: '✨', x: '70%', y: '20%', size: '1rem',   duration: 5.5, delay: 1 },
+]
+
 export default function Home() {
   const popular = defaultMenu.filter((item) => item.popular).slice(0, 4)
 
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-20 text-center">
-        <SteamAnimation />
+      <section className="relative overflow-hidden">
+        {/* Animated gradient background */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, type: 'spring' }}
-          className="text-7xl sm:text-8xl mb-6"
-        >
-          ☕
-        </motion.div>
-        <motion.h1
-          {...fadeUp}
-          transition={{ delay: 0.1, duration: 0.6 }}
-          className="font-display text-4xl sm:text-6xl font-bold text-espresso leading-tight mb-4"
-        >
-          Värme i
-          <br />
-          <span className="text-mocha italic">varje klunk</span>
-        </motion.h1>
-        <motion.p
-          {...fadeUp}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-mocha-light text-lg sm:text-xl max-w-md mx-auto mb-8 leading-relaxed"
-        >
-          Hantverksdrycker gjorda med kärlek, serverade med ett leende.
-          Förbeställ och hoppa över kön.
-        </motion.p>
-        <motion.div
-          {...fadeUp}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="flex flex-col sm:flex-row gap-3 justify-center"
-        >
-          <Link to="/menu">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-espresso text-cream px-8 py-3.5 rounded-full text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0 hover:bg-espresso-light transition-colors cursor-pointer"
+          className="absolute inset-0 -z-10"
+          animate={{
+            background: [
+              'radial-gradient(ellipse 80% 60% at 50% 0%, #e8d5b7 0%, #faf6f0 60%, #f5f0e8 100%)',
+              'radial-gradient(ellipse 80% 60% at 40% 10%, #dfc9a0 0%, #f5f0e8 60%, #faf6f0 100%)',
+              'radial-gradient(ellipse 80% 60% at 60% 5%,  #e8d5b7 0%, #faf6f0 60%, #f5f0e8 100%)',
+            ],
+          }}
+          transition={{ duration: 8, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+        />
+
+        {/* Floating background elements */}
+        {floatingItems.map((item, i) => (
+          <motion.div
+            key={i}
+            className="absolute select-none pointer-events-none"
+            style={{ left: item.x, top: item.y, fontSize: item.size, opacity: 0.18 }}
+            animate={{ y: [-10, 10, -10], rotate: [-8, 8, -8], scale: [1, 1.1, 1] }}
+            transition={{ duration: item.duration, repeat: Infinity, delay: item.delay, ease: 'easeInOut' }}
+          >
+            {item.emoji}
+          </motion.div>
+        ))}
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-24 text-center">
+          {/* Big mug */}
+          <div className="relative inline-block mb-6">
+            <SteamAnimation />
+
+            {/* Glow ring behind mug */}
+            <motion.div
+              className="absolute inset-0 rounded-full -z-10 blur-2xl"
+              style={{ background: 'radial-gradient(circle, rgba(180,120,60,0.25) 0%, transparent 70%)' }}
+              animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.9, 0.5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, rotate: -15 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.8, type: 'spring', stiffness: 120, damping: 10 }}
+              whileHover={{ scale: 1.12, rotate: [0, -5, 5, -3, 0] }}
+              style={{ fontSize: 'clamp(6rem, 18vw, 10rem)', lineHeight: 1, display: 'block', cursor: 'default' }}
             >
-              Bläddra i menyn <FiArrowRight />
-            </motion.button>
-          </Link>
-        </motion.div>
+              ☕
+            </motion.div>
+
+            {/* Orbiting sparkles */}
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                className="absolute text-xl pointer-events-none"
+                style={{ top: '50%', left: '50%' }}
+                animate={{
+                  x: Math.cos((i / 3) * Math.PI * 2) * 80,
+                  y: Math.sin((i / 3) * Math.PI * 2) * 80,
+                  rotate: 360,
+                  opacity: [0.4, 1, 0.4],
+                }}
+                transition={{
+                  duration: 4 + i,
+                  repeat: Infinity,
+                  ease: 'linear',
+                  delay: i * 1.2,
+                }}
+              >
+                ✨
+              </motion.span>
+            ))}
+          </div>
+
+          <motion.h1
+            {...fadeUp}
+            transition={{ delay: 0.15, duration: 0.6 }}
+            className="font-display text-5xl sm:text-7xl font-bold text-espresso leading-tight mb-4"
+          >
+            Värme i
+            <br />
+            <span className="text-mocha italic">varje klunk</span>
+          </motion.h1>
+
+          <motion.p
+            {...fadeUp}
+            transition={{ delay: 0.25, duration: 0.6 }}
+            className="text-mocha-light text-lg sm:text-xl max-w-md mx-auto mb-10 leading-relaxed"
+          >
+            Hantverksdrycker gjorda med kärlek, serverade med ett leende.
+            Förbeställ och hoppa över kön.
+          </motion.p>
+
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.35, duration: 0.6 }}
+            className="flex flex-col sm:flex-row gap-3 justify-center"
+          >
+            <Link to="/menu">
+              <motion.button
+                whileHover={{ scale: 1.07 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-espresso text-cream px-10 py-4 rounded-full text-base font-semibold flex items-center gap-2 mx-auto sm:mx-0 hover:bg-espresso-light transition-colors cursor-pointer shadow-lg"
+              >
+                Bläddra i menyn <FiArrowRight />
+              </motion.button>
+            </Link>
+          </motion.div>
+        </div>
       </section>
 
       {/* Popular section */}
