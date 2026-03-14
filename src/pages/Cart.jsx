@@ -112,7 +112,7 @@ export default function Cart() {
                   {milkOptions.find((m) => m.id === item.milk)?.label}
                 </p>
                 <span className="text-mocha font-medium text-sm">
-                  ${item.totalPrice.toFixed(2)} styck
+                  {item.totalPrice.toFixed(2)} kr styck
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -148,15 +148,15 @@ export default function Cart() {
         <motion.div layout className="bg-espresso rounded-xl p-5 mt-6 text-cream">
           <div className="flex justify-between mb-2 text-cream/70">
             <span>Delsumma</span>
-            <span>${totalPrice.toFixed(2)}</span>
+            <span>{totalPrice.toFixed(2)} kr</span>
           </div>
           <div className="flex justify-between mb-4 text-cream/70">
             <span>Moms</span>
-            <span>${(totalPrice * 0.08).toFixed(2)}</span>
+            <span>{(totalPrice * 0.08).toFixed(2)} kr</span>
           </div>
           <div className="border-t border-cream/20 pt-3 flex justify-between text-lg font-semibold">
             <span>Totalt</span>
-            <span>${(totalPrice * 1.08).toFixed(2)}</span>
+            <span>{(totalPrice * 1.08).toFixed(2)} kr</span>
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }}

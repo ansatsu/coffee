@@ -89,7 +89,7 @@ export default function Home() {
               <div className="text-5xl mb-3">{item.image}</div>
               <h3 className="font-display font-semibold text-espresso mb-1">{item.name}</h3>
               <p className="text-mocha-light text-sm mb-2">{item.description}</p>
-              <span className="text-mocha font-semibold">${item.price.toFixed(2)}</span>
+              <span className="text-mocha font-semibold">{item.price.toFixed(2)} kr</span>
             </motion.div>
           ))}
         </div>
