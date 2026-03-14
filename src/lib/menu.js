@@ -1,3 +1,5 @@
+// Offline fallback only — the canonical seed data lives in the `menu_items_default`
+// Supabase table. Keep this in sync if the defaults ever change.
 export const defaultMenu = [
   {
     id: 1,
