@@ -1,0 +1,18 @@
+# Local development conveniences — auto-merged by a plain `docker compose up`.
+# NOT for the Synology deployment; there, run with only the base file:
+#   docker compose -f docker-compose.yml up -d --build
+services:
+  db:
+    ports:
+      # psql / Prisma CLI access from the host (5433 avoids a local postgres clash)
+      - "5433:5432"
+
+  api:
+    ports:
+      # `npm run dev` proxies /api and /realtime here
+      - "3001:3001"
+
+networks:
+  backend:
+    # Host port publishing requires a non-internal network in dev
+    internal: false

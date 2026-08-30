@@ -11,6 +11,8 @@ npm run lint     # ESLint check
 npm run preview  # Preview production build locally
 
 docker compose up --build -d   # Full self-hosted stack → http://localhost:8080/coffee/
+                               # (auto-merges docker-compose.override.yml = dev ports)
+docker compose -f docker-compose.yml up -d --build   # Production topology (Synology)
 ```
 
 No test suite exists in this project.
@@ -20,9 +22,11 @@ No test suite exists in this project.
 **Stack:** React 19 + Vite, Tailwind CSS 4, Framer Motion, React Router DOM. Self-hosted via Docker Compose — no external services.
 
 **Docker Compose services:**
-- `db` — standard `postgres:17-alpine`. Exposed on host port **5433** for local dev.
-- `api` — Node/Express + Prisma backend in [server/](server/), exposed on host port **3001**. Runs `prisma migrate deploy` on start, then serves REST under `/api/*` and a WebSocket at `/realtime`.
-- `web` — nginx serving the Vite build at `/coffee/` on host port **8080**, proxying `/api` and `/realtime` to `api`.
+- `db` — standard `postgres:17-alpine` (multi-arch, un-pinned). On the `backend` network only (`internal: true` — no host port, no outbound route in production).
+- `api` — Node/Express + Prisma backend in [server/](server/), pinned `linux/amd64`. Bridges the `backend` and `frontend` networks. Runs `prisma migrate deploy` on start (creates tables + triggers + seed on first boot), then serves REST under `/api/*` and a WebSocket at `/realtime`.
+- `web` — nginx serving the Vite build at `/coffee/` on host port **8080** (the only published port), pinned `linux/amd64`, proxying `/api` and `/realtime` to `api` over the `frontend` network.
+
+**Dev vs prod:** `docker-compose.override.yml` (auto-merged locally) publishes db on host **5433** and api on host **3001** for `npm run dev` / psql / Prisma CLI, and un-internals the `backend` network to allow it. Production (Synology DS920+, Intel x86_64) uses only `docker-compose.yml`.
 
 **Database schema** is owned by Prisma: models in [server/prisma/schema.prisma](server/prisma/schema.prisma), DDL in [server/prisma/migrations/](server/prisma/migrations/). Postgres-specific pieces (order_number sequence starting at 100, `notify_table_change()` triggers, `factory_reset()` function, the `menu_items_default` seed data) live as raw SQL in the migration files. Schema changes = new Prisma migration; keep Prisma field names snake_case where columns are snake_case so REST and realtime payloads expose identical keys.
 

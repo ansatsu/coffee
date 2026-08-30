@@ -1,7 +1,19 @@
-# Production target is a Synology DS920+ (Intel x86_64). The built images
-# (api, web) are pinned to linux/amd64 so images built here can be shipped to
-# the NAS as-is (on Apple Silicon they run via Rosetta emulation). The db uses
-# the multi-arch postgres image un-pinned — each host pulls its native variant.
+# Production topology (Synology DS920+, Intel x86_64).
+#
+# Only `web` is published to the host — the browser talks solely to nginx,
+# which proxies /api and /realtime to the api container. Networks:
+#   frontend        web <-> api
+#   backend         api <-> db  (internal: no route outside the compose stack)
+#
+# The built images (api, web) are pinned to linux/amd64 so images built on an
+# Apple Silicon dev machine can be shipped to the NAS as-is (locally they run
+# via Rosetta emulation). The db uses the multi-arch postgres image un-pinned —
+# each host pulls its native variant.
+#
+# Local development: docker-compose.override.yml is auto-merged by a plain
+# `docker compose up` and publishes db/api ports for the Vite dev server.
+# On the NAS, deploy with only this file:
+#   docker compose -f docker-compose.yml up -d --build
 services:
   db:
     image: postgres:17-alpine
@@ -11,9 +23,8 @@ services:
       POSTGRES_PASSWORD: coffee
     volumes:
       - db-data:/var/lib/postgresql/data
-    ports:
-      # Host access for local dev / psql (5433 to avoid clashing with a local postgres)
-      - "5433:5432"
+    networks:
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U coffee -d coffee"]
       interval: 5s
@@ -27,9 +38,9 @@ services:
     environment:
       DATABASE_URL: postgres://coffee:coffee@db:5432/coffee
       PORT: 3001
-    ports:
-      # Host access so `npm run dev` (Vite proxy) can target the containerized API
-      - "3001:3001"
+    networks:
+      - backend
+      - frontend
     depends_on:
       db:
         condition: service_healthy
@@ -42,9 +53,16 @@ services:
     platform: linux/amd64
     ports:
       - "8080:80"
+    networks:
+      - frontend
     depends_on:
       - api
     restart: unless-stopped
+
+networks:
+  frontend:
+  backend:
+    internal: true
 
 volumes:
   db-data:

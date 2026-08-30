@@ -10,6 +10,10 @@ self-hosted via Docker Compose:
 - **web** — nginx serving the built frontend at `/coffee/`, proxying `/api` and
   `/realtime` to the api container.
 
+Only `web` is published to the host. The containers are wired over two compose
+networks: `frontend` (web ↔ api) and `backend` (api ↔ db, `internal: true` — the
+database has no route outside the stack).
+
 ## Run it
 
 ```bash
@@ -18,8 +22,23 @@ docker compose up --build -d
 
 Then open <http://localhost:8080/coffee/>.
 
-The database is migrated and seeded automatically on first start (the api container
-runs `prisma migrate deploy` before serving).
+Everything is provisioned on first boot: the api container runs
+`prisma migrate deploy` before serving, which creates the tables, realtime
+triggers, and seed data (the 12 default drinks) on an empty database.
+
+## Deploy to Synology (DS920+ / Container Manager)
+
+The built images are pinned `linux/amd64` to match the NAS. Copy the repo to the
+NAS and create a Container Manager project pointing at `docker-compose.yml`, or
+over SSH:
+
+```bash
+docker compose -f docker-compose.yml up -d --build
+```
+
+Passing `-f docker-compose.yml` explicitly skips `docker-compose.override.yml`,
+which exists only for local development (it publishes db/api ports to the host).
+The only port to expose/forward is `web`'s `8080`.
 
 ## Local frontend development
 
