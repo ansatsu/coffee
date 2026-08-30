@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Field names are intentionally snake_case where the DB column is snake_case:
+// realtime payloads are built with to_jsonb(row) in the notify trigger, so
+// REST responses (Prisma) and realtime events must expose identical keys.
+
+model MenuItem {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String  @default("")
+  price       Float
+  category    String
+  image       String  @default("☕")
+  popular     Boolean @default(false)
+  available   Boolean @default(true)
+
+  @@map("menu_items")
+}
+
+// Canonical seed data — factory_reset() repopulates menu_items from this table.
+model MenuItemDefault {
+  id          Int     @id
+  name        String
+  description String  @default("")
+  price       Float
+  category    String
+  image       String  @default("☕")
+  popular     Boolean @default(false)
+  available   Boolean @default(true)
+
+  @@map("menu_items_default")
+}
+
+model Order {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_number Int      @default(autoincrement())
+  items        Json
+  total        Float
+  status       String   @default("pending")
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("orders")
+}

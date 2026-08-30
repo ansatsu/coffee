@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { deleteMenuItem } from '../lib/api'
 import toast from 'react-hot-toast'
 
 export default function DeleteConfirm({ item, onClose, onDeleted }) {
@@ -9,9 +9,9 @@ export default function DeleteConfirm({ item, onClose, onDeleted }) {
   const handleDelete = async () => {
     setDeleting(true)
 
-    const { error } = await supabase.from('menu_items').delete().eq('id', item.id)
-
-    if (error) {
+    try {
+      await deleteMenuItem(item.id)
+    } catch {
       setDeleting(false)
       toast.error('Kunde inte ta bort produkten.')
       return

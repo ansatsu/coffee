@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { fetchActiveOrders, updateOrder, subscribe } from '../lib/api'
 
 const STATUS_CONFIG = {
   pending: { label: 'Väntar', bg: 'bg-white/10', border: 'border-yellow-400/60', text: 'text-yellow-300', dot: 'bg-yellow-400', card: 'text-white' },
@@ -59,39 +59,29 @@ export default function OrderMonitor() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!supabase) return
-
-    supabase
-      .from('orders')
-      .select('*')
-      .in('status', ['pending', 'preparing', 'ready'])
-      .order('created_at', { ascending: true })
-      .then(({ data }) => {
+    fetchActiveOrders()
+      .then((data) => {
         if (data) setOrders(data)
         setLoading(false)
       })
+      .catch(() => setLoading(false))
 
-    const channel = supabase
-      .channel('orders-monitor')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          const o = payload.new
-          if (['pending', 'preparing', 'ready'].includes(o.status)) {
-            playOrderChime()
-            setOrders((prev) => [...prev, o].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)))
-          }
-        } else if (payload.eventType === 'UPDATE') {
-          const o = payload.new
-          if (o.status === 'completed') {
-            setOrders((prev) => prev.filter((x) => x.id !== o.id))
-          } else {
-            setOrders((prev) => prev.map((x) => (x.id === o.id ? o : x)))
-          }
+    return subscribe('orders', (payload) => {
+      if (payload.eventType === 'INSERT') {
+        const o = payload.new
+        if (['pending', 'preparing', 'ready'].includes(o.status)) {
+          playOrderChime()
+          setOrders((prev) => [...prev, o].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)))
         }
-      })
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
+      } else if (payload.eventType === 'UPDATE') {
+        const o = payload.new
+        if (o.status === 'completed') {
+          setOrders((prev) => prev.filter((x) => x.id !== o.id))
+        } else {
+          setOrders((prev) => prev.map((x) => (x.id === o.id ? o : x)))
+        }
+      }
+    })
   }, [])
 
   const advanceStatus = async (order) => {
@@ -105,9 +95,9 @@ export default function OrderMonitor() {
       setOrders((prev) => prev.map((x) => (x.id === order.id ? { ...x, status: next } : x)))
     }
 
-    const { error } = await supabase.from('orders').update({ status: next }).eq('id', order.id)
-
-    if (error) {
+    try {
+      await updateOrder(order.id, { status: next })
+    } catch {
       setOrders((prev) => {
         const exists = prev.find((x) => x.id === order.id)
         if (exists) return prev.map((x) => (x.id === order.id ? { ...x, status: order.status } : x))

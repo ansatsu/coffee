@@ -5,31 +5,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev      # Start Vite dev server
+npm run dev      # Start Vite dev server (proxies /api + /realtime to localhost:3001)
 npm run build    # Production build
 npm run lint     # ESLint check
 npm run preview  # Preview production build locally
+
+docker compose up --build -d   # Full self-hosted stack → http://localhost:8080/coffee/
 ```
 
 No test suite exists in this project.
 
 ## Architecture
 
-**Stack:** React 19 + Vite, Tailwind CSS 4, Framer Motion, React Router DOM, Supabase JS client. Deployed to GitHub Pages at `/coffee/` base path.
+**Stack:** React 19 + Vite, Tailwind CSS 4, Framer Motion, React Router DOM. Self-hosted via Docker Compose — no external services.
 
-**Supabase** is initialized in [src/lib/supabase.js](src/lib/supabase.js) using a hardcoded publishable key (`sb_publishable_...`) — this is intentional, it is a public frontend key. Never swap it for a service role or admin key.
+**Docker Compose services:**
+- `db` — standard `postgres:17-alpine`. Exposed on host port **5433** for local dev.
+- `api` — Node/Express + Prisma backend in [server/](server/), exposed on host port **3001**. Runs `prisma migrate deploy` on start, then serves REST under `/api/*` and a WebSocket at `/realtime`.
+- `web` — nginx serving the Vite build at `/coffee/` on host port **8080**, proxying `/api` and `/realtime` to `api`.
 
-**Routing** (`/coffee/` basename): `/` Home, `/menu` Menu, `/cart` Cart, `/orders` Order Monitor.
+**Database schema** is owned by Prisma: models in [server/prisma/schema.prisma](server/prisma/schema.prisma), DDL in [server/prisma/migrations/](server/prisma/migrations/). Postgres-specific pieces (order_number sequence starting at 100, `notify_table_change()` triggers, `factory_reset()` function, the `menu_items_default` seed data) live as raw SQL in the migration files. Schema changes = new Prisma migration; keep Prisma field names snake_case where columns are snake_case so REST and realtime payloads expose identical keys.
 
-**State:** Cart state lives entirely in `CartContext` (useReducer). No other global state. Supabase is the source of truth for orders and menu items.
+**Realtime** is built on Postgres LISTEN/NOTIFY: triggers on `menu_items` and `orders` `pg_notify` a JSON payload `{table, eventType: INSERT|UPDATE|DELETE, new, old}` on channel `table_changes`; the api server LISTENs and relays to all `/realtime` WebSocket clients. Payloads over ~7KB arrive id-only (`partial: true`) and are hydrated by the server before broadcast.
 
-**Supabase changes** (schema migrations, seeding, SQL) are made via the Supabase MCP connection — use the `mcp__supabase__apply_migration` tool for DDL and `mcp__supabase__execute_sql` for data. Project ID: `odpmhpqyyshgftrkyjcx`.
+**Frontend data access** goes through [src/lib/api.js](src/lib/api.js): REST helpers (`fetchMenu`, `createOrder`, `factoryReset`, …) plus `subscribe(table, handler)` which manages a shared auto-reconnecting WebSocket and returns an unsubscribe function (used directly as useEffect cleanup).
 
-**Two Supabase tables:**
-- `menu_items` — seeded with 12 Swedish drinks. Menu page fetches on mount and subscribes to realtime INSERT/UPDATE/DELETE.
-- `orders` — has `id` (uuid), `order_number` (auto-incrementing from 100), `items` (JSONB array with `{name, size, milk, quantity, price, image}`), `total`, `status` (`pending → preparing → ready → completed`). Order Monitor subscribes to realtime changes.
+**Routing** (`/coffee/` basename): `/` Home, `/menu` Menu, `/cart` Cart, `/orders` Order Monitor, `/admin` Admin.
 
-**Order flow:** Cart inserts order → returns `order_number` → shows confirmation screen. Order Monitor page uses optimistic UI for status updates (reverts on DB error). Orders disappear from the monitor when status reaches `completed`.
+**State:** Cart state lives entirely in `CartContext` (useReducer). No other global state. Postgres is the source of truth for orders and menu items.
+
+**Three tables:**
+- `menu_items` — seeded with 12 Swedish drinks (from `menu_items_default`). Menu/Home/Admin fetch on mount and subscribe to realtime changes.
+- `menu_items_default` — canonical seed copy; `factory_reset()` restores `menu_items` from it and wipes orders. Keep [src/lib/menu.js](src/lib/menu.js) fallback data in sync with it.
+- `orders` — `id` (uuid), `order_number` (auto-incrementing from 100), `items` (JSONB array with `{name, size, milk, quantity, price, image}`), `total`, `status` (`pending → preparing → ready → completed`), `created_at`. Order Monitor subscribes to realtime changes.
+
+**Order flow:** Cart POSTs order → response includes `order_number` → shows confirmation screen. Order Monitor page uses optimistic UI for status updates (reverts on API error). Orders disappear from the monitor when status reaches `completed`.
 
 **DrinkCustomizer** is a modal used in both Menu and Home pages — import and render it with `item` and `onClose` props, it handles cart add internally.
 

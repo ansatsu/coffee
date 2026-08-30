@@ -1,0 +1,9 @@
+node_modules
+dist
+server
+.git
+.github
+.claude
+.devcontainer
+.vscode
+docker-compose.yml

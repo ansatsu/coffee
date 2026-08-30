@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { fetchMenu, updateMenuItem, factoryReset, subscribe } from '../lib/api'
 import toast from 'react-hot-toast'
 import MenuItemForm from '../components/MenuItemForm'
 import DeleteConfirm from '../components/DeleteConfirm'
@@ -28,34 +28,27 @@ export default function Admin() {
   const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
-    supabase
-      .from('menu_items')
-      .select('*')
-      .order('id')
-      .then(({ data }) => {
+    fetchMenu()
+      .then((data) => {
         if (data) setItems(data)
         setLoading(false)
       })
+      .catch(() => setLoading(false))
 
     // Realtime: INSERT, UPDATE, DELETE — admin list stays live across sessions
-    const channel = supabase
-      .channel('admin-menu')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'menu_items' }, (payload) => {
+    return subscribe('menu_items', (payload) => {
+      if (payload.eventType === 'INSERT') {
         setItems((prev) => {
           // Avoid duplicates (if the insert came from this session, onSaved already added it)
           if (prev.some((i) => i.id === payload.new.id)) return prev
           return [...prev, payload.new]
         })
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'menu_items' }, (payload) => {
+      } else if (payload.eventType === 'UPDATE') {
         setItems((prev) => prev.map((i) => (i.id === payload.new.id ? payload.new : i)))
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'menu_items' }, (payload) => {
+      } else if (payload.eventType === 'DELETE') {
         setItems((prev) => prev.filter((i) => i.id !== Number(payload.old.id)))
-      })
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
+      }
+    })
   }, [])
 
   const toggleAvailable = async (item) => {
@@ -64,18 +57,14 @@ export default function Admin() {
 
     setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, available: next } : i)))
 
-    const { error } = await supabase
-      .from('menu_items')
-      .update({ available: next })
-      .eq('id', item.id)
-
-    if (error) {
-      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, available: item.available } : i)))
-      toast.error('Kunde inte uppdatera drycken.')
-    } else {
+    try {
+      await updateMenuItem(item.id, { available: next })
       toast.success(`${item.name} är nu ${next ? 'tillgänglig' : 'slutsåld'}.`, {
         style: { background: '#2c1810', color: '#f5f0e8', borderRadius: '12px' },
       })
+    } catch {
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, available: item.available } : i)))
+      toast.error('Kunde inte uppdatera drycken.')
     }
 
     setToggling(null)
@@ -97,17 +86,19 @@ export default function Admin() {
 
   const handleFactoryReset = async () => {
     setResetting(true)
-    const { error } = await supabase.rpc('factory_reset')
-    setResetting(false)
-    setShowReset(false)
-
-    if (error) {
+    try {
+      await factoryReset()
+    } catch {
+      setResetting(false)
+      setShowReset(false)
       toast.error('Återställningen misslyckades.')
       return
     }
+    setResetting(false)
+    setShowReset(false)
 
     // Re-fetch the fresh default items
-    const { data } = await supabase.from('menu_items').select('*').order('id')
+    const data = await fetchMenu().catch(() => null)
     if (data) setItems(data)
 
     toast.success('Allt återställt till fabriksinställningar! 🏭', {

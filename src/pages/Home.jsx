@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import SteamAnimation from '../components/SteamAnimation'
 import DrinkCustomizer from '../components/DrinkCustomizer'
 import { defaultMenu } from '../lib/menu'
-import { supabase } from '../lib/supabase'
+import { fetchMenu, subscribe } from '../lib/api'
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -30,65 +30,40 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchPopular() {
-      const { data, error } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('popular', true)
-        .eq('available', true)
-        .order('id')
-        .limit(4)
-
-      if (!error && data && data.length > 0) {
-        setPopular(data)
-      } else {
+      try {
+        const data = await fetchMenu()
+        const pop = data.filter((i) => i.popular && i.available).slice(0, 4)
+        setPopular(pop.length > 0 ? pop : fallbackPopular)
+      } catch {
         setPopular(fallbackPopular)
       }
     }
 
     fetchPopular()
 
-    const channel = supabase
-      .channel('menu_items_popular')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'menu_items' },
-        (payload) => {
-          const item = payload.new
-          if (item.popular && item.available) {
-            setPopular((prev) => {
-              if (prev.find((i) => i.id === item.id)) return prev
-              return [...prev, item].slice(0, 4)
-            })
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'menu_items' },
-        (payload) => {
-          const item = payload.new
+    return subscribe('menu_items', (payload) => {
+      if (payload.eventType === 'INSERT') {
+        const item = payload.new
+        if (item.popular && item.available) {
           setPopular((prev) => {
-            const filtered = prev.filter((i) => i.id !== item.id)
-            if (item.popular && item.available) {
-              return [...filtered, item].slice(0, 4)
-            }
-            return filtered
+            if (prev.find((i) => i.id === item.id)) return prev
+            return [...prev, item].slice(0, 4)
           })
         }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'menu_items' },
-        (payload) => {
-          const deletedId = payload.old.id
-          setPopular((prev) => prev.filter((i) => i.id !== deletedId))
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+      } else if (payload.eventType === 'UPDATE') {
+        const item = payload.new
+        setPopular((prev) => {
+          const filtered = prev.filter((i) => i.id !== item.id)
+          if (item.popular && item.available) {
+            return [...filtered, item].slice(0, 4)
+          }
+          return filtered
+        })
+      } else if (payload.eventType === 'DELETE') {
+        const deletedId = payload.old.id
+        setPopular((prev) => prev.filter((i) => i.id !== deletedId))
+      }
+    })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

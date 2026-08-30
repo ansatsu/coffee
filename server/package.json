@@ -1,0 +1,17 @@
+{
+  "name": "coffee-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "express": "^4.21.2",
+    "pg": "^8.16.3",
+    "prisma": "^6.19.1",
+    "ws": "^8.18.3"
+  }
+}

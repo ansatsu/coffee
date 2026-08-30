@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: coffee
+      POSTGRES_USER: coffee
+      POSTGRES_PASSWORD: coffee
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      # Host access for local dev / psql (5433 to avoid clashing with a local postgres)
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coffee -d coffee"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: ./server
+    environment:
+      DATABASE_URL: postgres://coffee:coffee@db:5432/coffee
+      PORT: 3001
+    ports:
+      # Host access so `npm run dev` (Vite proxy) can target the containerized API
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  db-data:

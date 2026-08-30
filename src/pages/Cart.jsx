@@ -3,7 +3,7 @@ import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight } from 'react-ic
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { sizes, milkOptions } from '../lib/menu'
-import { supabase } from '../lib/supabase'
+import { createOrder } from '../lib/api'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
 
@@ -16,39 +16,26 @@ export default function Cart() {
     if (!items.length) return
     setPlacing(true)
 
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('orders')
-        .insert({
-          items: items.map((i) => ({
-            name: i.name,
-            size: i.size,
-            milk: i.milk,
-            quantity: i.quantity,
-            price: i.totalPrice,
-            image: i.image,
-          })),
-          total: totalPrice,
-          status: 'pending',
-        })
-        .select('order_number')
-        .single()
-
-      if (error) {
-        toast.error('Det gick inte att lägga beställningen. Försök igen.')
-        setPlacing(false)
-        return
-      }
+    try {
+      const order = await createOrder({
+        items: items.map((i) => ({
+          name: i.name,
+          size: i.size,
+          milk: i.milk,
+          quantity: i.quantity,
+          price: i.totalPrice,
+          image: i.image,
+        })),
+        total: totalPrice,
+      })
 
       clearCart()
+      setConfirmedOrder(order.order_number)
+    } catch {
+      toast.error('Det gick inte att lägga beställningen. Försök igen.')
+    } finally {
       setPlacing(false)
-      setConfirmedOrder(data.order_number)
-      return
     }
-
-    clearCart()
-    setPlacing(false)
-    setConfirmedOrder('?')
   }
 
   if (confirmedOrder) {

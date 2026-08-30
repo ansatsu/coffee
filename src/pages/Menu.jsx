@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FiSearch } from 'react-icons/fi'
 import MenuCard from '../components/MenuCard'
 import { defaultMenu, categories } from '../lib/menu'
-import { supabase } from '../lib/supabase'
+import { fetchMenu, subscribe } from '../lib/api'
 
 export default function Menu() {
   const [menu, setMenu] = useState(defaultMenu)
@@ -11,28 +11,23 @@ export default function Menu() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    if (!supabase) return
-
     // Initial fetch
-    supabase.from('menu_items').select('*').order('id').then(({ data, error }) => {
-      if (!error && data?.length) setMenu(data)
-    })
+    fetchMenu()
+      .then((data) => {
+        if (data?.length) setMenu(data)
+      })
+      .catch(() => {})
 
     // Realtime — reflect any menu changes live
-    const channel = supabase
-      .channel('menu-items')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'menu_items' }, (payload) => {
+    return subscribe('menu_items', (payload) => {
+      if (payload.eventType === 'INSERT') {
         setMenu((prev) => [...prev, payload.new])
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'menu_items' }, (payload) => {
+      } else if (payload.eventType === 'UPDATE') {
         setMenu((prev) => prev.map((item) => (item.id === payload.new.id ? payload.new : item)))
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'menu_items' }, (payload) => {
+      } else if (payload.eventType === 'DELETE') {
         setMenu((prev) => prev.filter((item) => item.id !== Number(payload.old.id)))
-      })
-      .subscribe()
-
-    return () => supabase.removeChannel(channel)
+      }
+    })
   }, [])
 
   const filtered = menu.filter((item) => {

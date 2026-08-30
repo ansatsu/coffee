@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
+import { createMenuItem, updateMenuItem } from '../lib/api'
 import toast from 'react-hot-toast'
 
 const EMOJI_OPTIONS = [
@@ -112,25 +112,22 @@ export default function MenuItemForm({ item, onClose, onSaved }) {
       available: form.available,
     }
 
-    let result
-    if (isEdit) {
-      result = await supabase.from('menu_items').update(payload).eq('id', item.id).select().single()
-    } else {
-      result = await supabase.from('menu_items').insert(payload).select().single()
-    }
-
-    setSaving(false)
-
-    if (result.error) {
+    let saved
+    try {
+      saved = isEdit ? await updateMenuItem(item.id, payload) : await createMenuItem(payload)
+    } catch {
+      setSaving(false)
       toast.error('Något gick fel. Försök igen.')
       return
     }
+
+    setSaving(false)
 
     toast.success(isEdit ? `${payload.name} uppdaterad!` : `${payload.name} tillagd i menyn!`, {
       style: { background: '#2c1810', color: '#f5f0e8', borderRadius: '12px' },
     })
 
-    onSaved(result.data)
+    onSaved(saved)
     onClose()
   }
 
