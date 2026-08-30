@@ -1,3 +1,7 @@
+# Production target is a Synology DS920+ (Intel x86_64). The built images
+# (api, web) are pinned to linux/amd64 so images built here can be shipped to
+# the NAS as-is (on Apple Silicon they run via Rosetta emulation). The db uses
+# the multi-arch postgres image un-pinned — each host pulls its native variant.
 services:
   db:
     image: postgres:17-alpine
@@ -19,6 +23,7 @@ services:
 
   api:
     build: ./server
+    platform: linux/amd64
     environment:
       DATABASE_URL: postgres://coffee:coffee@db:5432/coffee
       PORT: 3001
@@ -34,6 +39,7 @@ services:
     build:
       context: .
       dockerfile: web/Dockerfile
+    platform: linux/amd64
     ports:
       - "8080:80"
     depends_on:
