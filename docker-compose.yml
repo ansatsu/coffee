@@ -34,6 +34,7 @@ services:
 
   api:
     build: ./server
+    image: coffee-api:latest
     platform: linux/amd64
     environment:
       DATABASE_URL: postgres://coffee:coffee@db:5432/coffee
@@ -50,6 +51,7 @@ services:
     build:
       context: .
       dockerfile: web/Dockerfile
+    image: coffee-web:latest
     platform: linux/amd64
     ports:
       - "8080:80"

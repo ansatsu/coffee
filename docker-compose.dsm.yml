@@ -1,0 +1,62 @@
+# Synology DSM Container Manager project file — uses pre-built images only
+# (no `build:` keys, which Container Manager cannot resolve without the source
+# tree). Deploy:
+#
+#   1. Container Manager → Image → Add → Add from file: import
+#        postgres-17-alpine.amd64.tar
+#        coffee-api.amd64.tar
+#        coffee-web.amd64.tar
+#   2. Container Manager → Project → Create: paste/select this file.
+#   3. Start the project → http://<nas-ip>:8080/coffee/
+#
+# The database provisions itself on first boot (tables, realtime triggers,
+# seed data) — no manual steps. Only web:8080 is published; db and api sit on
+# compose-internal networks.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: coffee
+      POSTGRES_USER: coffee
+      POSTGRES_PASSWORD: coffee
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coffee -d coffee"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    image: coffee-api:latest
+    environment:
+      DATABASE_URL: postgres://coffee:coffee@db:5432/coffee
+      PORT: 3001
+    networks:
+      - backend
+      - frontend
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    image: coffee-web:latest
+    ports:
+      - "8080:80"
+    networks:
+      - frontend
+    depends_on:
+      - api
+    restart: unless-stopped
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
+volumes:
+  db-data:
