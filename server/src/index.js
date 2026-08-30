@@ -105,7 +105,8 @@ app.patch(
 app.post(
   '/api/factory-reset',
   asyncHandler(async (req, res) => {
-    await prisma.$queryRaw`SELECT factory_reset()`
+    // SELECT ... FROM: Prisma cannot deserialize a bare void-returning function
+    await prisma.$queryRaw`SELECT 1 AS ok FROM factory_reset()`
     res.json({ ok: true })
   })
 )
